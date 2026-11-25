@@ -15,12 +15,16 @@ from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent
 SOURCE_FILE = REPO_DIR / "entry.png.b64"
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
 def build_image() -> bytes:
     """Decode the stored image. Raises if the payload is not valid base64."""
     text = SOURCE_FILE.read_text(encoding="ascii").strip()
-    return base64.b64decode(text, validate=True)
+    image_bytes = base64.b64decode(text, validate=True)
+    if not image_bytes.startswith(PNG_MAGIC):
+        raise ValueError("decoded payload is not a PNG image")
+    return image_bytes
 
 
 def main() -> int:
